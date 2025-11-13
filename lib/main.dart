@@ -1,4 +1,5 @@
 import 'package:favorite_places/config/theme_config.dart';
+import 'package:favorite_places/view/places/places_view.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Favourite Places',
       theme: ThemeConfig.theme,
-      home: Container(),
+      home: const PlacesView(),
     );
   }
 }
