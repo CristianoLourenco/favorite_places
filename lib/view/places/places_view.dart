@@ -24,7 +24,10 @@ class PlacesView extends ConsumerWidget {
           ),
         ],
       ),
-      body: PlaceListComponent(places: userPlaces),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: PlaceListComponent(places: userPlaces),
+      ),
     );
   }
 }

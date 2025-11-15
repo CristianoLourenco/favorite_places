@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:favorite_places/providers/user_places_provider.dart';
 import 'package:favorite_places/view/components/image_input_component.dart';
+import 'package:favorite_places/view/components/location_input_component.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,6 +59,8 @@ class _AddPlaceViewState extends ConsumerState<AddPlaceView> {
                 _selectedImage = image;
               },
             ),
+            const SizedBox(height: 16),
+            const LocationInputComponent(),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _savePlace,
