@@ -7,7 +7,7 @@ import 'package:location/location.dart';
 class LocationInputComponent extends ConsumerStatefulWidget {
   final void Function(LocationModel location) onLocationAdded;
 
-  const LocationInputComponent(this.onLocationAdded, {super.key});
+  const LocationInputComponent({required this.onLocationAdded, super.key});
 
   @override
   ConsumerState<LocationInputComponent> createState() =>
@@ -20,12 +20,9 @@ class _LocationInputComponentState
 
   final _isGetingLocation = ValueNotifier<bool>(false);
 
-  void getCurrentLocation() async {
-    Location location = Location();
-
+  void askPermission(Location location) async {
     bool serviceEnabled;
     PermissionStatus permissionGranted;
-    LocationData locationData;
 
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
@@ -42,25 +39,40 @@ class _LocationInputComponentState
         return;
       }
     }
+  }
+
+  void getCurrentLocation() async {
+    final userPlacePovider = ref.read(userPlacesProvider.notifier);
+    Location location = Location();
+
+    LocationData locationData;
+    askPermission(location);
+
     _isGetingLocation.value = true;
     locationData = await location.getLocation();
-    final address = await ref
-        .read(userPlacesProvider.notifier)
-        .getLocation(
-          locationData.latitude.toString(),
-          locationData.longitude.toString(),
-        );
+
+    final address = await userPlacePovider.getLocation(
+      locationData.latitude.toString(),
+      locationData.longitude.toString(),
+    );
 
     if (address == null ||
         locationData.latitude == null ||
         locationData.longitude == null) {
       return;
     }
+    final mapImage = userPlacePovider.getImageLocation(
+      locationData.latitude!,
+      locationData.longitude!,
+    );
+
     _pickedLocation = LocationModel(
       latitude: locationData.latitude!,
       longitude: locationData.longitude!,
       address: address,
+      mapImageAddress: mapImage,
     );
+    widget.onLocationAdded.call(_pickedLocation!);
     _isGetingLocation.value = false;
   }
 

@@ -17,19 +17,19 @@ class AddPlaceView extends ConsumerStatefulWidget {
 class _AddPlaceViewState extends ConsumerState<AddPlaceView> {
   late final TextEditingController _titleController;
   File? _selectedImage;
-  LocationModel? _locationModel;
+  LocationModel? _selectedLocation;
 
   void _savePlace() {
     final enteredText = _titleController.text;
     if (enteredText.isEmpty ||
         _selectedImage == null ||
-        _locationModel == null) {
+        _selectedLocation == null) {
       return;
     }
 
     ref
         .read(userPlacesProvider.notifier)
-        .addPlace(enteredText, _selectedImage!, _locationModel!);
+        .addPlace(enteredText, _selectedImage!, _selectedLocation!);
     Navigator.of(context).pop();
   }
 
@@ -66,7 +66,11 @@ class _AddPlaceViewState extends ConsumerState<AddPlaceView> {
               },
             ),
             const SizedBox(height: 16),
-            LocationInputComponent((location) {}),
+            LocationInputComponent(
+              onLocationAdded: (location) {
+                _selectedLocation = location;
+              },
+            ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _savePlace,
