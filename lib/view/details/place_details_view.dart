@@ -1,4 +1,5 @@
 import 'package:favorite_places/models/place_model.dart';
+import 'package:favorite_places/view/map/map_view.dart';
 import 'package:flutter/material.dart';
 
 class PlaceDetailsView extends StatelessWidget {
@@ -24,9 +25,23 @@ class PlaceDetailsView extends StatelessWidget {
             right: 0,
             child: Column(
               children: [
-                CircleAvatar(
-                  radius: 70,
-                  backgroundImage: NetworkImage(place.location.mapImageAddress),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => MapView(
+                          isSelecting: false,
+                          location: place.location,
+                        ),
+                      ),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 70,
+                    backgroundImage: NetworkImage(
+                      place.location.mapImageAddress,
+                    ),
+                  ),
                 ),
                 Container(
                   alignment: Alignment.center,
