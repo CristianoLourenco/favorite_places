@@ -9,6 +9,10 @@ class PlaceModel {
   final File image;
   final LocationModel location;
 
-  PlaceModel({required this.title, required this.image, required this.location})
-    : id = const Uuid().v4();
+  PlaceModel({
+    required this.title,
+    required this.image,
+    required this.location,
+    String? id,
+  }) : id = id ?? const Uuid().v4();
 }

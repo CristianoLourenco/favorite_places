@@ -10,9 +10,54 @@ import 'package:riverpod/legacy.dart';
 import 'package:path_provider/path_provider.dart' as syspaths;
 import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart' as sql;
+import 'package:sqflite/sqlite_api.dart';
 
 class UserPlacesProvider extends StateNotifier<List<PlaceModel>> {
   UserPlacesProvider() : super(const []);
+
+  Future<Database> _getDatabase() async {
+    final dbPath = await sql.getDatabasesPath();
+    return sql.openDatabase(
+      path.join(dbPath, 'places.db'),
+      version: 1,
+      onCreate: (db, version) {
+        return db.execute('''CREATE TABLE user_places(
+            id TEXT PRIMARY KEY, 
+            title TEXT, 
+            image TEXT, 
+            lat REAL, 
+            lng REAL, 
+            address TEXT
+            )''');
+      },
+    );
+  }
+
+  Future<void> loadPlaces() async {
+    final db = await _getDatabase();
+
+    final data = await db.query('user_places');
+    final places = data
+        .map(
+          (row) => PlaceModel(
+            id: row['id'] as String,
+            title: row['title'] as String,
+            image: File(row['image'] as String),
+            location: LocationModel(
+              latitude: row['lat'] as double,
+              longitude: row['lng'] as double,
+              address: row['address'] as String,
+              mapImageAddress: getImageLocation(
+                row['lat'] as double,
+                row['lng'] as double,
+              ),
+            ),
+          ),
+        )
+        .toList();
+
+    state = places;
+  }
 
   void addPlace(String title, File image, LocationModel location) async {
     final appDir = await syspaths.getApplicationDocumentsDirectory();
@@ -28,21 +73,7 @@ class UserPlacesProvider extends StateNotifier<List<PlaceModel>> {
       location: location,
     );
 
-    final dbPath = await sql.getDatabasesPath();
-    final db = await sql.openDatabase(
-      path.join(dbPath, 'places.db'),
-      version: 1,
-      onCreate: (db, version) {
-        return db.execute('''CREATE TABLE user_places(
-            id TEXT PRIMARY KEY, 
-            title TEXT, 
-            image TEXT, 
-            lat REAL, 
-            lng REAL, 
-            address TEXT
-            )''');
-      },
-    );
+    final db = await _getDatabase();
     await db.insert('user_places', {
       'id': newPlace.id,
       'title': newPlace.title,
