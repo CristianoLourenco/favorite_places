@@ -1,7 +1,9 @@
 import 'package:favorite_places/models/location_model.dart';
 import 'package:favorite_places/providers/user_places_provider.dart';
+import 'package:favorite_places/view/map/map_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
 class LocationInputComponent extends ConsumerStatefulWidget {
@@ -41,38 +43,47 @@ class _LocationInputComponentState
     }
   }
 
-  void getCurrentLocation() async {
+  Future<void> _savePickedLocation(double latitude, double longitude) async {
     final userPlacePovider = ref.read(userPlacesProvider.notifier);
-    Location location = Location();
+    final address = await userPlacePovider.getLocation(latitude, longitude);
 
-    LocationData locationData;
-    askPermission(location);
+    if (address == null) return;
 
-    _isGetingLocation.value = true;
-    locationData = await location.getLocation();
-
-    final address = await userPlacePovider.getLocation(
-      locationData.latitude.toString(),
-      locationData.longitude.toString(),
-    );
-
-    if (address == null ||
-        locationData.latitude == null ||
-        locationData.longitude == null) {
-      return;
-    }
-    final mapImage = userPlacePovider.getImageLocation(
-      locationData.latitude!,
-      locationData.longitude!,
-    );
+    final mapImage = userPlacePovider.getImageLocation(latitude, longitude);
 
     _pickedLocation = LocationModel(
-      latitude: locationData.latitude!,
-      longitude: locationData.longitude!,
+      latitude: latitude,
+      longitude: longitude,
       address: address,
       mapImageAddress: mapImage,
     );
-    widget.onLocationAdded.call(_pickedLocation!);
+
+    widget.onLocationAdded(_pickedLocation!);
+  }
+
+  void getCurrentLocation() async {
+    final location = Location();
+
+    askPermission(location);
+
+    _isGetingLocation.value = true;
+    final locationData = await location.getLocation();
+    if (locationData.latitude == null || locationData.longitude == null) return;
+    await _savePickedLocation(locationData.latitude!, locationData.longitude!);
+    _isGetingLocation.value = false;
+  }
+
+  void _selectOnMap() async {
+    final pickedLocation = await Navigator.of(
+      context,
+    ).push<LatLng?>(MaterialPageRoute(builder: (ctx) => MapView()));
+
+    if (pickedLocation == null) return;
+    _isGetingLocation.value = true;
+    await _savePickedLocation(
+      pickedLocation.latitude,
+      pickedLocation.longitude,
+    );
     _isGetingLocation.value = false;
   }
 
@@ -138,7 +149,7 @@ class _LocationInputComponentState
               label: const Text("Get current location"),
             ),
             TextButton.icon(
-              onPressed: () {},
+              onPressed: _selectOnMap,
               icon: const Icon(Icons.map),
               label: const Text("Select on Map"),
             ),

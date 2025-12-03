@@ -8,24 +8,32 @@ class MapView extends StatefulWidget {
   final LocationModel location;
   final bool isSelecting;
 
-  const MapView({super.key, required this.location, this.isSelecting = false});
+  const MapView({
+    super.key,
+    this.location = const LocationModel(
+      latitude: 0,
+      longitude: 0,
+      address: '',
+      mapImageAddress: '',
+    ),
+    this.isSelecting = true,
+  });
 
   @override
   State<MapView> createState() => _MapViewState();
 }
 
-/*
-
-const LocationModel(latitude: 37.422, longitude: -122.084, address: "", mapImageAddress: ""),
-*/
 class _MapViewState extends State<MapView> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
+  LatLng? _pickedLocation;
+  // late final CameraPosition _kGooglePlex;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,29 +45,41 @@ class _MapViewState extends State<MapView> {
 
         actions: [
           if (widget.isSelecting)
-            IconButton(onPressed: () {}, icon: const Icon(Icons.save)),
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).pop(_pickedLocation);
+              },
+              icon: const Icon(Icons.save),
+            ),
         ],
       ),
 
       body: GoogleMap(
-        mapType: MapType.hybrid,
+        mapType: MapType.normal,
+        onTap: (location) {
+          setState(() {
+            _pickedLocation = location;
+          });
+        },
         onMapCreated: (controller) => _controller.complete(controller),
-        initialCameraPosition: _kGooglePlex,
+        initialCameraPosition: CameraPosition(
+          target: LatLng(widget.location.latitude, widget.location.longitude),
+          zoom: 24.4746,
+        ),
 
-        // CameraPosition(
-        //   target: LatLng(widget.location.latitude, widget.location.longitude),
-        //   zoom: 10,
-        // ),
-
-        // markers: {
-        //   Marker(
-        //     markerId: const MarkerId("m1"),
-        //     position: LatLng(
-        //       widget.location.latitude,
-        //       widget.location.longitude,
-        //     ),
-        //   ),
-        // },
+        markers: (_pickedLocation == null || !widget.isSelecting)
+            ? {}
+            : {
+                Marker(
+                  markerId: const MarkerId("m1"),
+                  position:
+                      _pickedLocation ??
+                      LatLng(
+                        widget.location.latitude,
+                        widget.location.longitude,
+                      ),
+                ),
+              },
       ),
     );
   }

@@ -4,7 +4,7 @@ class LocationModel {
   final String address;
   final String mapImageAddress;
 
-  LocationModel({
+  const LocationModel({
     required this.latitude,
     required this.longitude,
     required this.address,

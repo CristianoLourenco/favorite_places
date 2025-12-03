@@ -14,7 +14,7 @@ class UserPlacesProvider extends StateNotifier<List<PlaceModel>> {
     state = [newPlace, ...state];
   }
 
-  Future<String?> getLocation(String lat, String long) async {
+  Future<String?> getLocation(double lat, double long) async {
     try {
       final dioClient = Dio();
 
