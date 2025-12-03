@@ -28,11 +28,16 @@ class _MapViewState extends State<MapView> {
       Completer<GoogleMapController>();
 
   LatLng? _pickedLocation;
-  // late final CameraPosition _kGooglePlex;
 
   @override
   void initState() {
     super.initState();
+    if (widget.isSelecting) {
+      _pickedLocation = LatLng(
+        widget.location.latitude,
+        widget.location.longitude,
+      );
+    }
   }
 
   @override
@@ -56,18 +61,20 @@ class _MapViewState extends State<MapView> {
 
       body: GoogleMap(
         mapType: MapType.normal,
-        onTap: (location) {
-          setState(() {
-            _pickedLocation = location;
-          });
-        },
+        onTap: !widget.isSelecting
+            ? null
+            : (location) {
+                setState(() {
+                  _pickedLocation = location;
+                });
+              },
         onMapCreated: (controller) => _controller.complete(controller),
         initialCameraPosition: CameraPosition(
           target: LatLng(widget.location.latitude, widget.location.longitude),
-          zoom: 24.4746,
+          zoom: 8.4746,
         ),
 
-        markers: (_pickedLocation == null || !widget.isSelecting)
+        markers: (_pickedLocation == null && widget.isSelecting)
             ? {}
             : {
                 Marker(

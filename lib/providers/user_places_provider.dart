@@ -35,7 +35,7 @@ class UserPlacesProvider extends StateNotifier<List<PlaceModel>> {
   }
 
   String getImageLocation(double lat, double long) {
-    return "https://maps.googleapis.com/maps/api/staticmap?center=$lat,$long&zoom=10&size=600x300&maptype=roadmap&markers=color:red%7Clabel:A%7C$lat,$long&&key=${Env.googleApiKey}";
+    return "https://maps.googleapis.com/maps/api/staticmap?center=$lat,$long&zoom=8&size=600x300&maptype=roadmap&markers=color:red%7Clabel:A%7C$lat,$long&&key=${Env.googleApiKey}";
   }
 }
 
