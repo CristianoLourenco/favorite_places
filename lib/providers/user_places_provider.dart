@@ -1,16 +1,31 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:favorite_places/env/env.dart';
 import 'package:favorite_places/models/location_model.dart';
 import 'package:favorite_places/models/place_model.dart';
+import 'package:flutter/widgets.dart';
 import 'package:riverpod/legacy.dart';
+import 'package:path_provider/path_provider.dart' as syspaths;
+import 'package:path/path.dart' as path;
 
 class UserPlacesProvider extends StateNotifier<List<PlaceModel>> {
   UserPlacesProvider() : super(const []);
 
-  void addPlace(String title, File image, LocationModel location) {
-    final newPlace = PlaceModel(title: title, image: image, location: location);
+  void addPlace(String title, File image, LocationModel location) async {
+    final appDir = await syspaths.getApplicationDocumentsDirectory();
+    final fileNmae = path.basename(image.path);
+    final savedImage = await image.copy('${appDir.path}/$fileNmae');
+   
+    debugPrint('Image saved at: ${savedImage.path}');
+    log('Image saved at: ${savedImage.path}');
+
+    final newPlace = PlaceModel(
+      title: title,
+      image: savedImage,
+      location: location,
+    );
     state = [newPlace, ...state];
   }
 
